@@ -1,0 +1,71 @@
+# Dependencies
+node_modules
+.pnpm-store
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+.venv
+venv
+env
+
+# Build artifacts
+.next
+out
+build
+dist
+*.wasm
+.wrangler
+
+# Environment files
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+
+# Git and CI
+.git
+.github
+.gitignore
+.gitattributes
+
+# Editor configs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Documentation
+*.md
+README.md
+LICENSE
+
+# Docker files
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+.coverage
+htmlcov
+.pytest_cache
+.mypy_cache
+
+# Misc
+.editorconfig
+.prettierrc
+.eslintrc*
+tsconfig.json
+bun.lock
+package-lock.json
+yarn.lock
