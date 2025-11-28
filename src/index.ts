@@ -1,60 +1,29 @@
-import { Container, getContainer, getRandom } from "@cloudflare/containers";
+import { Container, getContainer } from "@cloudflare/containers";
 import { Hono } from "hono";
+import log from "loglevel";
+export class WorkerContainer extends Container<Env> {
+  defaultPort = 8080;
+  sleepAfter = "2m";
 
-export class MyContainer extends Container<Env> {
-	defaultPort = 8080;
-	sleepAfter = "2m";
-	envVars = {
-		MESSAGE: "I was passed in via the container class!",
-	};
+  override onStart() {
+    log.info("Container successfully started");
+  }
 
-	override onStart() {
-		console.log("Container successfully started");
-	}
+  override onStop() {
+    log.info("Container successfully shut down");
+  }
 
-	override onStop() {
-		console.log("Container successfully shut down");
-	}
-
-	override onError(error: unknown) {
-		console.log("Container error:", error);
-	}
+  override onError(error: unknown) {
+    log.info(`Container error: ${error}`);
+  }
 }
 
 const app = new Hono<{
-	Bindings: Env;
+  Bindings: Env;
 }>();
 
-app.get("/", (c) => {
-	return c.text(
-		"Available endpoints:\n" +
-		"GET /container/<ID> - Start a container for each ID with a 2m timeout\n" +
-		"GET /lb - Load balance requests over multiple containers\n" +
-		"GET /error - Start a container that errors (demonstrates error handling)\n" +
-		"GET /singleton - Get a single specific container instance",
-	);
+app.get("/", async (c) => {
+  const container = getContainer(c.env.CONTAINER);
+  return await container.fetch(c.req.raw);
 });
-
-app.get("/container/:id", async (c) => {
-	const id = c.req.param("id");
-	const containerId = c.env.MY_CONTAINER.idFromName(`/container/${id}`);
-	const container = c.env.MY_CONTAINER.get(containerId);
-	return await container.fetch(c.req.raw);
-});
-
-app.get("/error", async (c) => {
-	const container = getContainer(c.env.MY_CONTAINER, "error-test");
-	return await container.fetch(c.req.raw);
-});
-
-app.get("/lb", async (c) => {
-	const container = await getRandom(c.env.MY_CONTAINER, 3);
-	return await container.fetch(c.req.raw);
-});
-
-app.get("/singleton", async (c) => {
-	const container = getContainer(c.env.MY_CONTAINER);
-	return await container.fetch(c.req.raw);
-});
-
 export default app;

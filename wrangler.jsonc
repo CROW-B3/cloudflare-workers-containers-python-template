@@ -10,7 +10,7 @@
   "placement": { "mode": "smart" },
   "containers": [
     {
-      "class_name": "MyContainer",
+      "class_name": "WorkerContainer",
       "image": "./Dockerfile",
       "max_instances": 10,
     },
@@ -18,8 +18,8 @@
   "durable_objects": {
     "bindings": [
       {
-        "class_name": "MyContainer",
-        "name": "MY_CONTAINER",
+        "class_name": "WorkerContainer",
+        "name": "CONTAINER",
       },
     ],
   },
@@ -27,6 +27,15 @@
     {
       "new_sqlite_classes": ["MyContainer"],
       "tag": "v1",
+    },
+    {
+      "tag": "<v3>",
+      "renamed_classes": [
+        {
+          "from": "MyContainer",
+          "to": "Container",
+        },
+      ],
     },
   ],
   "upload_source_maps": true,
