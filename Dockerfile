@@ -1,24 +1,31 @@
-# syntax=docker/dockerfile:1
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 
-FROM golang:1.24-alpine AS build
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
-# Set destination for COPY
 WORKDIR /app
 
-# Download any Go modules
-COPY container_src/go.mod ./
-RUN go mod download
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=container_src/pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-dev
 
-# Copy container source code
-COPY container_src/*.go ./
+COPY container_src .
 
-# Build
-RUN CGO_ENABLED=0 GOOS=linux go build -o /server
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
 
-FROM scratch
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=build /server /server
+FROM python:3.12-slim-bookworm
+
+RUN groupadd --system --gid 999 nonroot \
+ && useradd --system --gid 999 --uid 999 --create-home nonroot
+
+COPY --from=builder --chown=nonroot:nonroot /app /app
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+USER nonroot
+
+WORKDIR /app
+
 EXPOSE 8080
 
-# Run
-CMD ["/server"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
