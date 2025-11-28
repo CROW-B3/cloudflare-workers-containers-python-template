@@ -1,6 +1,6 @@
 {
   "name": "cloudflare-workers-containers-python-template",
-  "description": "Python FastAPI container for Cloudflare Workers",
+  "description": "Build a Container-enabled Worker",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
